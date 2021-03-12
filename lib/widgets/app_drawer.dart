@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:focus_farmer/screens/timer_select_screen.dart';
+import 'package:focus_farmer/screens/tree_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -9,14 +11,41 @@ class AppDrawer extends StatelessWidget {
         child: Column(
           children: [
             AppBar(
-              title: Text('Drawer Menu'),
+              title: Text(
+                'Menu',
+                style: Theme.of(context).textTheme.headline6,
+              ),
               automaticallyImplyLeading: false,
             ),
-            Text('first child'),
+            ListTile(
+              leading: Icon(Icons.timer),
+              title: Text(
+                'Timer',
+                style: Theme.of(context).textTheme.headline6,
+              ),
+              onTap: () => Navigator.of(context)
+                  .pushReplacementNamed(TimerSelectScreen.routeName),
+            ),
             Divider(),
-            Text('second child'),
+            ListTile(
+              leading: Icon(Icons.arrow_upward),
+              title: Text(
+                'Your Tree',
+                style: Theme.of(context).textTheme.headline6,
+              ),
+              onTap: () => Navigator.of(context)
+                  .pushReplacementNamed(TreeScreen.routeName),
+            ),
             Divider(),
-            Text('third child'),
+            ListTile(
+              leading: Icon(Icons.timer),
+              title: Text(
+                'About',
+                style: Theme.of(context).textTheme.headline6,
+              ),
+              onTap: () => Navigator.of(context)
+                  .pushReplacementNamed(TimerSelectScreen.routeName),
+            ),
             Divider(),
           ],
         ),
