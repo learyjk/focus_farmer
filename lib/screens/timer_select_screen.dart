@@ -1,13 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:focus_farmer/constants.dart';
+import 'package:focus_farmer/providers/fruit_stack.dart';
+import 'package:focus_farmer/providers/stack_item.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:focus_farmer/widgets/bottom_button.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:focus_farmer/widgets/app_drawer.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:focus_farmer/widgets/carousel_item.dart';
+import 'package:provider/provider.dart';
+import 'dart:math';
 
 class TimerSelectScreen extends StatefulWidget {
   static const String routeName = '/timer-select-screen';
@@ -61,8 +64,35 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
     }
   }
 
+  generateRandomPosition(double itemSize, double treeSize) {
+    double radius = (MediaQuery.of(context).size.width / 2) - (3 * itemSize);
+    double midTreeH = treeSize / 2;
+    double midTreeW = (MediaQuery.of(context).size.width / 2);
+
+    var rand = Random();
+    var t = 2 * pi * rand.nextDouble(); //random angle
+    var r = rand.nextDouble() * radius;
+
+    var xCoord = midTreeW + r * cos(t);
+    var yCoord = midTreeH + r * sin(t);
+
+    // print('x: $xCoord');
+    // print('y: $yCoord');
+    return [xCoord, yCoord];
+  }
+
   void timerComplete() {
     print('Timer Completed!');
+    var newTreeCoordinate = generateRandomPosition(
+        MediaQuery.of(context).size.width * 0.05,
+        MediaQuery.of(context).size.width);
+    StackItem itemToAdd = StackItem(
+        id: '4',
+        value: '🍆',
+        xCoord: newTreeCoordinate[0],
+        yCoord: newTreeCoordinate[1],
+        dateTime: DateTime.now());
+    Provider.of<FruitStack>(context, listen: false).addStackItem(itemToAdd);
   }
 
   void updateSelectedFruit(int i, CarouselPageChangedReason reason) {

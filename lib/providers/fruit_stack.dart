@@ -28,4 +28,9 @@ class FruitStack with ChangeNotifier {
   List<StackItem> get fruitStack {
     return [..._fruitStack];
   }
+
+  void addStackItem(StackItem item) {
+    _fruitStack.add(item);
+    notifyListeners();
+  }
 }
