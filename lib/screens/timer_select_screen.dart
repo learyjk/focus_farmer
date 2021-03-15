@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:focus_farmer/constants.dart';
 import 'package:focus_farmer/providers/fruit_stack.dart';
 import 'package:focus_farmer/providers/stack_item.dart';
+import 'package:focus_farmer/screens/tree_screen.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:focus_farmer/widgets/bottom_button.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
@@ -11,6 +13,12 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:focus_farmer/widgets/carousel_item.dart';
 import 'package:provider/provider.dart';
 import 'dart:math';
+import 'package:flutter_svg/flutter_svg.dart';
+
+enum TimerResult {
+  Success,
+  Failure,
+}
 
 class TimerSelectScreen extends StatefulWidget {
   static const String routeName = '/timer-select-screen';
@@ -22,8 +30,8 @@ class TimerSelectScreen extends StatefulWidget {
 class _TimerSelectScreenState extends State<TimerSelectScreen> {
   bool _isCountingDown = false;
   int _durationInMinutes = 25;
-  final List<String> _availableFruitList = ['🍎', '🍌', '🍊'];
-  int indexItemToGrow = 0;
+  final List<String> _availableFruitList = ['apple', 'banana', 'orange'];
+  int _indexItemToGrow = 0;
 
   CountDownController _controller = CountDownController();
 
@@ -54,59 +62,107 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
       });
     } else {
       //Give Up has been pressed
-      print('You gave up!');
+      //print('You gave up!');
       _controller.pause();
       setState(() {
         _isCountingDown = false;
       });
       _controller.restart(duration: _durationInMinutes * 60);
       _controller.pause();
+      _showMyDialog(TimerResult.Failure);
     }
   }
 
-  generateRandomPosition(double itemSize, double treeSize) {
-    double radius = (MediaQuery.of(context).size.width / 2) - (3 * itemSize);
-    double midTreeH = treeSize / 2;
-    double midTreeW = (MediaQuery.of(context).size.width / 2);
+  // generateRandomPosition({double itemSize, double treeSize}) {
+  //   double radius = (MediaQuery.of(context).size.width / 2) - (3 * itemSize);
+  //   double midTreeH = treeSize / 2;
+  //   double midTreeW = (MediaQuery.of(context).size.width / 2);
+  //
+  //   var rand = Random();
+  //   var t = 2 * pi * rand.nextDouble(); //random angle
+  //   var r = rand.nextDouble() * radius;
+  //
+  //   var xCoord = midTreeW + r * cos(t);
+  //   var yCoord = midTreeH + r * sin(t);
+  //
+  //   // print('x: $xCoord');
+  //   // print('y: $yCoord');
+  //   return [xCoord, yCoord];
+  // }
 
-    var rand = Random();
-    var t = 2 * pi * rand.nextDouble(); //random angle
-    var r = rand.nextDouble() * radius;
-
-    var xCoord = midTreeW + r * cos(t);
-    var yCoord = midTreeH + r * sin(t);
-
-    // print('x: $xCoord');
-    // print('y: $yCoord');
-    return [xCoord, yCoord];
-  }
-
-  void timerComplete() {
+  void timerCompleteSuccess() {
     print('Timer Completed!');
-    var newTreeCoordinate = generateRandomPosition(
-        MediaQuery.of(context).size.width * 0.05,
-        MediaQuery.of(context).size.width);
+    setState(() {
+      _isCountingDown = false;
+    });
+    final rand = Random();
     StackItem itemToAdd = StackItem(
-        id: '4',
-        value: '🍆',
-        xCoord: newTreeCoordinate[0],
-        yCoord: newTreeCoordinate[1],
+        id: DateTime.now().toString(),
+        label: _availableFruitList[_indexItemToGrow],
+        assetPath:
+            'assets/images/fruits/${_availableFruitList[_indexItemToGrow]}.svg',
+        unitRadius: rand.nextDouble(),
+        unitAngle: rand.nextDouble(),
         dateTime: DateTime.now());
     Provider.of<FruitStack>(context, listen: false).addStackItem(itemToAdd);
+    print(itemToAdd.unitRadius);
+    print(itemToAdd.unitAngle);
+    Navigator.of(context).pushReplacementNamed(TreeScreen.routeName);
+    _showMyDialog(TimerResult.Success);
   }
 
-  void updateSelectedFruit(int i, CarouselPageChangedReason reason) {
-    print('selection is: $i and reason is $reason');
+  // void updateSelectedFruit(int i, CarouselPageChangedReason reason) {
+  //   _indexItemToGrow = i;
+  // }
+
+  Future<void> _showMyDialog(TimerResult result) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            result == TimerResult.Success
+                ? 'Great Job!'
+                : '💀 No Fruit For You!',
+            style: Theme.of(context).textTheme.headline3,
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  result == TimerResult.Success
+                      ? 'Your Productivity Tree has a new ${_availableFruitList[_indexItemToGrow]} now!'
+                      : 'You failed to grow the ${_availableFruitList[_indexItemToGrow]}.',
+                  style: Theme.of(context).textTheme.headline6,
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                  result == TimerResult.Success ? '😁 Awesome!' : '🥺 Bummer'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: AppDrawer(),
+      drawer: !_isCountingDown ? AppDrawer() : null,
       appBar: AppBar(
-        title: Text(
-          'Focus Farmer',
-          style: Theme.of(context).textTheme.headline3,
+        title: Center(
+          child: Text(
+            'Productivity Tree',
+            style: Theme.of(context).textTheme.headline3,
+          ),
         ),
       ),
       body: Center(
@@ -120,7 +176,7 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
                 height: MediaQuery.of(context).size.width / 2,
                 duration: _durationInMinutes * 60,
                 controller: _controller,
-                fillColor: Colors.lightGreen,
+                fillColor: Colors.green,
                 ringColor: Colors.grey[300],
                 strokeWidth: 20,
                 strokeCap: StrokeCap.round,
@@ -128,27 +184,38 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
                 isReverse: true,
                 autoStart: false,
                 onStart: () {},
-                onComplete: () => timerComplete(),
+                onComplete: () => timerCompleteSuccess(),
               ),
             ),
-            FittedBox(
-              fit: BoxFit.fitWidth,
+            Padding(
+              padding: EdgeInsets.only(top: 0, bottom: 20),
               child: Text(
                 !_isCountingDown ? 'What do you want to grow?' : ' ',
                 style: Theme.of(context).textTheme.headline6,
               ),
             ),
-            CarouselSlider(
-                items: _availableFruitList
-                    .map((fruit) => CarouselItem(fruit))
-                    .toList(),
-                options: CarouselOptions(
-                    height: 140,
-                    onPageChanged: (index, reason) {
-                      updateSelectedFruit(index, reason);
-                    })),
-            FittedBox(
-              fit: BoxFit.fitWidth,
+            !_isCountingDown
+                ? CarouselSlider(
+                    items: _availableFruitList
+                        .map((fruit) => CarouselItem(fruit))
+                        .toList(),
+                    options: CarouselOptions(
+                      height: 120,
+                      onPageChanged: (index, reason) {
+                        setState(() {
+                          _indexItemToGrow = index;
+                        });
+                      },
+                    ),
+                  )
+                : SvgPicture.asset(
+                    'assets/images/fruits/${_availableFruitList[_indexItemToGrow]}.svg',
+                    semanticsLabel: '',
+                    width: 120,
+                    height: 120,
+                  ),
+            Padding(
+              padding: EdgeInsets.only(top: 40, bottom: 10),
               child: Text(
                 !_isCountingDown
                     ? 'How long do you want to focus for?'
@@ -185,7 +252,7 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
             ),
             BottomButton(
                 title: !_isCountingDown ? 'Start' : 'Give Up',
-                color: !_isCountingDown ? Colors.lightGreen : Colors.red,
+                color: !_isCountingDown ? Colors.green : Colors.red,
                 onTap: timerStarted),
           ],
         ),

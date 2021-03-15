@@ -3,24 +3,27 @@ import 'package:focus_farmer/providers/stack_item.dart';
 
 class FruitStack with ChangeNotifier {
   List<StackItem> _fruitStack = [
-    StackItem(
-        id: '1',
-        value: '🍎',
-        xCoord: 135,
-        yCoord: 227,
-        dateTime: DateTime.now()),
-    StackItem(
-        id: '2',
-        value: '🍑',
-        xCoord: 140,
-        yCoord: 200,
-        dateTime: DateTime.now()),
-    StackItem(
-        id: '3',
-        value: '🍌',
-        xCoord: 120,
-        yCoord: 250,
-        dateTime: DateTime.now())
+    // StackItem(
+    //     id: '1',
+    //     label: 'Apple',
+    //     assetPath: 'assets/images/fruits/apple.svg',
+    //     distFromLeft: 0.00,
+    //     distFromTop: 0.00,
+    //     dateTime: DateTime.now()),
+    // StackItem(
+    //     id: '2',
+    //     label: 'Apricot',
+    //     assetPath: 'assets/images/fruits/apricot.svg',
+    //     distFromLeft: 1.1,
+    //     distFromTop: 1.1,
+    //     dateTime: DateTime.now()),
+    // StackItem(
+    //     id: '3',
+    //     label: 'Banana',
+    //     assetPath: 'assets/images/fruits/bananas.svg',
+    //     distFromLeft: 0.27,
+    //     distFromTop: 0.19,
+    //     dateTime: DateTime.now())
   ];
 
   FruitStack();

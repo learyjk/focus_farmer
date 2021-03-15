@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focus_farmer/screens/timer_select_screen.dart';
 import 'package:focus_farmer/screens/tree_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -18,7 +19,12 @@ class AppDrawer extends StatelessWidget {
               automaticallyImplyLeading: false,
             ),
             ListTile(
-              leading: Icon(Icons.timer),
+              leading: SvgPicture.asset(
+                'assets/images/fruits/apple.svg',
+                semanticsLabel: 'Timer Apple',
+                width: 30,
+                height: 30,
+              ),
               title: Text(
                 'Timer',
                 style: Theme.of(context).textTheme.headline6,
@@ -28,7 +34,12 @@ class AppDrawer extends StatelessWidget {
             ),
             Divider(),
             ListTile(
-              leading: Icon(Icons.arrow_upward),
+              leading: SvgPicture.asset(
+                'assets/images/tree.svg',
+                semanticsLabel: 'Productivity Tree',
+                width: 30,
+                height: 30,
+              ),
               title: Text(
                 'Your Tree',
                 style: Theme.of(context).textTheme.headline6,
@@ -38,7 +49,12 @@ class AppDrawer extends StatelessWidget {
             ),
             Divider(),
             ListTile(
-              leading: Icon(Icons.timer),
+              leading: SvgPicture.asset(
+                'assets/images/fruits/banana.svg',
+                semanticsLabel: 'About Banana',
+                width: 30,
+                height: 30,
+              ),
               title: Text(
                 'About',
                 style: Theme.of(context).textTheme.headline6,

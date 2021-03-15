@@ -17,8 +17,10 @@ class MyApp extends StatelessWidget {
       create: (context) => FruitStack(),
       child: MaterialApp(
           title: 'Focus Farmer',
+          //themeMode: ThemeMode.dark,
+          darkTheme: ThemeData.dark().copyWith(),
           theme: ThemeData(
-            primarySwatch: Colors.lightGreen,
+            primarySwatch: Colors.green,
             fontFamily: 'Inter',
             textTheme: ThemeData.light().textTheme.copyWith(
                   bodyText1: TextStyle(

@@ -2,15 +2,17 @@ import 'package:flutter/cupertino.dart';
 
 class StackItem {
   final String id;
-  final Object value;
-  final double xCoord;
-  final double yCoord;
+  final String assetPath;
+  final Object label;
+  final double unitRadius;
+  final double unitAngle;
   final DateTime dateTime;
 
   StackItem(
       {@required this.id,
-      @required this.value,
-      @required this.xCoord,
-      @required this.yCoord,
+      @required this.assetPath,
+      @required this.label,
+      @required this.unitRadius,
+      @required this.unitAngle,
       @required this.dateTime});
 }
