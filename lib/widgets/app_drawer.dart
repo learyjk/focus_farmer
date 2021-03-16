@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_farmer/screens/about.dart';
 import 'package:focus_farmer/screens/timer_select_screen.dart';
 import 'package:focus_farmer/screens/tree_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -60,7 +61,7 @@ class AppDrawer extends StatelessWidget {
                 style: Theme.of(context).textTheme.headline6,
               ),
               onTap: () => Navigator.of(context)
-                  .pushReplacementNamed(TimerSelectScreen.routeName),
+                  .pushReplacementNamed(AboutScreen.routeName),
             ),
             Divider(),
           ],

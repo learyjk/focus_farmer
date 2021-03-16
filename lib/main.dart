@@ -4,6 +4,7 @@ import 'package:focus_farmer/screens/tree_screen.dart';
 import 'package:provider/provider.dart';
 import 'screens/timer_select_screen.dart';
 import 'package:flutter/widgets.dart';
+import 'package:focus_farmer/screens/about.dart';
 
 //Icons made by Freepik https://www.freepik.comfrom https://www.flaticon.com/
 
@@ -49,6 +50,7 @@ class MyApp extends StatelessWidget {
           routes: {
             TimerSelectScreen.routeName: (ctx) => TimerSelectScreen(),
             TreeScreen.routeName: (ctx) => TreeScreen(),
+            AboutScreen.routeName: (ctx) => AboutScreen(),
           }),
     );
   }
