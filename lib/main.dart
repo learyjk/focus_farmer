@@ -3,10 +3,14 @@ import 'package:focus_farmer/providers/fruit_stack.dart';
 import 'package:focus_farmer/screens/tree_screen.dart';
 import 'package:provider/provider.dart';
 import 'screens/timer_select_screen.dart';
+import 'package:flutter/widgets.dart';
 
 //Icons made by Freepik https://www.freepik.comfrom https://www.flaticon.com/
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Open the database and store the reference.
+
   runApp(MyApp());
 }
 

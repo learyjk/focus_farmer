@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:focus_farmer/constants.dart';
 import 'package:focus_farmer/providers/fruit_stack.dart';
 import 'package:focus_farmer/providers/stack_item.dart';
 import 'package:focus_farmer/screens/tree_screen.dart';
@@ -11,7 +10,6 @@ import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:focus_farmer/widgets/app_drawer.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:focus_farmer/widgets/carousel_item.dart';
-import 'package:provider/provider.dart';
 import 'dart:math';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -38,6 +36,10 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
   @override
   void initState() {
     super.initState();
+
+    // initialize the database
+    FruitStack.db.database;
+
     //last function to call
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _controller.restart(duration: 3); //_durationInMinutes * 60);
@@ -62,7 +64,6 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
       });
     } else {
       //Give Up has been pressed
-      //print('You gave up!');
       _controller.pause();
       setState(() {
         _isCountingDown = false;
@@ -73,47 +74,26 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
     }
   }
 
-  // generateRandomPosition({double itemSize, double treeSize}) {
-  //   double radius = (MediaQuery.of(context).size.width / 2) - (3 * itemSize);
-  //   double midTreeH = treeSize / 2;
-  //   double midTreeW = (MediaQuery.of(context).size.width / 2);
-  //
-  //   var rand = Random();
-  //   var t = 2 * pi * rand.nextDouble(); //random angle
-  //   var r = rand.nextDouble() * radius;
-  //
-  //   var xCoord = midTreeW + r * cos(t);
-  //   var yCoord = midTreeH + r * sin(t);
-  //
-  //   // print('x: $xCoord');
-  //   // print('y: $yCoord');
-  //   return [xCoord, yCoord];
-  // }
-
   void timerCompleteSuccess() {
-    print('Timer Completed!');
     setState(() {
       _isCountingDown = false;
     });
     final rand = Random();
     StackItem itemToAdd = StackItem(
-        id: DateTime.now().toString(),
-        label: _availableFruitList[_indexItemToGrow],
-        assetPath:
-            'assets/images/fruits/${_availableFruitList[_indexItemToGrow]}.svg',
-        unitRadius: rand.nextDouble(),
-        unitAngle: rand.nextDouble(),
-        dateTime: DateTime.now());
-    Provider.of<FruitStack>(context, listen: false).addStackItem(itemToAdd);
-    print(itemToAdd.unitRadius);
-    print(itemToAdd.unitAngle);
-    Navigator.of(context).pushReplacementNamed(TreeScreen.routeName);
-    _showMyDialog(TimerResult.Success);
-  }
+      //id: 1,
+      label: _availableFruitList[_indexItemToGrow],
+      assetPath:
+          'assets/images/fruits/${_availableFruitList[_indexItemToGrow]}.svg',
+      unitRadius: rand.nextDouble(),
+      unitAngle: rand.nextDouble(),
+      dateTime: DateTime.now().toIso8601String(),
+    );
 
-  // void updateSelectedFruit(int i, CarouselPageChangedReason reason) {
-  //   _indexItemToGrow = i;
-  // }
+    FruitStack.db.addStackItem(itemToAdd).then((_) {
+      Navigator.of(context).pushReplacementNamed(TreeScreen.routeName);
+      _showMyDialog(TimerResult.Success);
+    });
+  }
 
   Future<void> _showMyDialog(TimerResult result) async {
     return showDialog<void>(

@@ -38,8 +38,6 @@ class StackItemWidget extends StatelessWidget {
       coordinates[0] = coordinates[0] + xTrans;
       coordinates[1] = coordinates[1] + yTrans;
 
-      print(coordinates);
-
       return coordinates;
     }
 
@@ -57,12 +55,3 @@ class StackItemWidget extends StatelessWidget {
     );
   }
 }
-
-// Positioned(
-// left: item.xCoord,
-// top: item.yCoord,
-// child: Text(
-// item.value,
-// style: TextStyle(fontSize: fruitSize),
-// ),
-// );
