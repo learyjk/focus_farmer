@@ -11,7 +11,13 @@ import 'package:focus_farmer/widgets/app_drawer.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:focus_farmer/widgets/carousel_item.dart';
 import 'dart:math';
+import 'dart:async';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+//TODO Animate apple when timer starts
+//TODO Implement firebase authentication
+//TODO Enable users to purchase different fruits
 
 enum TimerResult {
   Success,
@@ -25,13 +31,42 @@ class TimerSelectScreen extends StatefulWidget {
   _TimerSelectScreenState createState() => _TimerSelectScreenState();
 }
 
-class _TimerSelectScreenState extends State<TimerSelectScreen> {
+class _TimerSelectScreenState extends State<TimerSelectScreen>
+    with WidgetsBindingObserver {
   bool _isCountingDown = false;
   int _durationInMinutes = 25;
   final List<String> _availableFruitList = ['apple', 'banana', 'orange'];
   int _indexItemToGrow = 0;
-
   CountDownController _controller = CountDownController();
+  FlutterLocalNotificationsPlugin _localNotificationsPlugin;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    setState(() {
+      switch (state) {
+        case AppLifecycleState.resumed:
+          //_appLifecycleState = AppLifecycleState.resumed;
+          //print("app in resumed");
+          break;
+        case AppLifecycleState.inactive:
+          //_appLifecycleState = AppLifecycleState.inactive;
+          //print("app in inactive");
+          break;
+        case AppLifecycleState.paused:
+          //_appLifecycleState = AppLifecycleState.paused;
+          //print("app in paused");
+          if (_isCountingDown) {
+            _showNotification('Stay Productive!',
+                'Your timer is still running.  We will notify you when it finishes.');
+          }
+          break;
+        case AppLifecycleState.detached:
+          //_appLifecycleState = AppLifecycleState.detached;
+          //print("app in detached");
+          break;
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -40,14 +75,43 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
     // initialize the database
     FruitStack.db.database;
 
+    // Observe if app is in background or foreground
+    WidgetsBinding.instance.addObserver(this);
+
+    // Initialize notifications
+    _initNotifications();
+
     //last function to call
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _controller.restart(duration: 3); //_durationInMinutes * 60);
+      //_durationInMinutes * 60 -- change to 1 second for testing here!
+      _controller.restart(duration: _durationInMinutes * 60);
       _controller.pause();
     });
   }
 
-  void numberPickerChanged(selectedMins) {
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  void _initNotifications() {
+    _localNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('ic_launcher');
+    final IOSInitializationSettings initializationSettingsIOS =
+        IOSInitializationSettings();
+    final MacOSInitializationSettings initializationSettingsMacOS =
+        MacOSInitializationSettings();
+    final InitializationSettings initializationSettings =
+        InitializationSettings(
+            android: initializationSettingsAndroid,
+            iOS: initializationSettingsIOS,
+            macOS: initializationSettingsMacOS);
+    _localNotificationsPlugin.initialize(initializationSettings);
+  }
+
+  void _numberPickerChanged(selectedMins) {
     setState(() {
       _durationInMinutes = selectedMins;
       _controller.restart(duration: _durationInMinutes * 60);
@@ -55,13 +119,25 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
     });
   }
 
-  void timerStarted() {
+  void _bottomButtonPressed() {
     if (!_isCountingDown) {
       //Start has been pressed
       _controller.start();
       setState(() {
         _isCountingDown = true;
       });
+
+      // _showNotification(
+      //     'Get to work!', 'We will notify you when the timer is complete!');
+      //schedule completion notification
+
+      // Schedule notification for when timer finsihes.
+      _scheduleNotification(
+          'Timer Completed!',
+          'You worked for $_durationInMinutes minutes and have a new ${_availableFruitList[_indexItemToGrow]} on your Productivity Tree!',
+          _durationInMinutes * 60);
+      //
+
     } else {
       //Give Up has been pressed
       _controller.pause();
@@ -70,11 +146,13 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
       });
       _controller.restart(duration: _durationInMinutes * 60);
       _controller.pause();
+      _localNotificationsPlugin.cancelAll();
       _showMyDialog(TimerResult.Failure);
     }
   }
 
-  void timerCompleteSuccess() {
+  void _timerCompleteSuccess() {
+    print('Timer complete!');
     setState(() {
       _isCountingDown = false;
     });
@@ -93,6 +171,33 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
       Navigator.of(context).pushReplacementNamed(TreeScreen.routeName);
       _showMyDialog(TimerResult.Success);
     });
+  }
+
+  Future _showNotification(String title, String message) async {
+    var androidDetails = AndroidNotificationDetails(
+        'channelID', 'keeganleary', 'This is channel keeganleary',
+        importance: Importance.max);
+    var iosDetails = IOSNotificationDetails();
+    var generalNotificationDetails =
+        NotificationDetails(android: androidDetails, iOS: iosDetails);
+    await _localNotificationsPlugin.show(
+        0, title, message, generalNotificationDetails);
+  }
+
+  Future _scheduleNotification(
+      String title, String message, int numSeconds) async {
+    var androidDetails = AndroidNotificationDetails(
+        'channelId', 'Local Notification', 'android: description',
+        importance: Importance.max);
+    var iosDetails = IOSNotificationDetails();
+    var generalNotificationDetails =
+        NotificationDetails(android: androidDetails, iOS: iosDetails);
+    await _localNotificationsPlugin.schedule(
+        0,
+        title,
+        message,
+        DateTime.now().add(Duration(seconds: numSeconds)),
+        generalNotificationDetails);
   }
 
   Future<void> _showMyDialog(TimerResult result) async {
@@ -133,6 +238,8 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
     );
   }
 
+  void _timerStart() {}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -163,8 +270,8 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
                 textStyle: Theme.of(context).textTheme.headline3,
                 isReverse: true,
                 autoStart: false,
-                onStart: () {},
-                onComplete: () => timerCompleteSuccess(),
+                onStart: () => _timerStart(),
+                onComplete: () => _timerCompleteSuccess(),
               ),
             ),
             Padding(
@@ -180,7 +287,7 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
                         .map((fruit) => CarouselItem(fruit))
                         .toList(),
                     options: CarouselOptions(
-                      height: 120,
+                      height: 100,
                       onPageChanged: (index, reason) {
                         setState(() {
                           _indexItemToGrow = index;
@@ -199,8 +306,9 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
               child: Text(
                 !_isCountingDown
                     ? 'How long do you want to focus for?'
-                    : 'Get to work!',
+                    : 'Get to work!\n\n You will receive a notification when the timer finishes.',
                 style: Theme.of(context).textTheme.headline6,
+                textAlign: TextAlign.center,
               ),
             ),
             Expanded(
@@ -221,7 +329,7 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
                       selectedTextStyle:
                           TextStyle(fontFamily: 'Inter', fontSize: 50),
                       value: _durationInMinutes,
-                      onChanged: (mins) => numberPickerChanged(mins),
+                      onChanged: (mins) => _numberPickerChanged(mins),
                     )
                   : SizedBox(
                       height: 50,
@@ -233,7 +341,7 @@ class _TimerSelectScreenState extends State<TimerSelectScreen> {
             BottomButton(
                 title: !_isCountingDown ? 'Start' : 'Give Up',
                 color: !_isCountingDown ? Colors.green : Colors.red,
-                onTap: timerStarted),
+                onTap: _bottomButtonPressed),
           ],
         ),
       ),
