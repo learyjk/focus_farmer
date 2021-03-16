@@ -84,4 +84,10 @@ class FruitStack with ChangeNotifier {
     //notifyListeners();
     return stackItemList;
   }
+
+  Future deleteStack() async {
+    final db = await database;
+    db.delete(table);
+    notifyListeners();
+  }
 }

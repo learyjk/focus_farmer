@@ -8,6 +8,7 @@
 .buildlog/
 .history
 .svn/
+/assets/images/keegan.png
 
 # IntelliJ related
 *.iml

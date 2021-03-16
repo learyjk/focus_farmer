@@ -48,6 +48,63 @@ class _TreeScreenState extends State<TreeScreen> {
     return stackList;
   }
 
+  Future<void> _areYouSure() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Are you sure?',
+            style: Theme.of(context).textTheme.headline3,
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  'You will lose all of your hard-earned fruit!',
+                  style: Theme.of(context).textTheme.headline6,
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      child: Text('Never Mind'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    SizedBox(
+                      width: 50,
+                    ),
+                    TextButton(
+                      child: Text(
+                        'Clear it!',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      onPressed: () {
+                        _clearTree();
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _clearTree() {
+    FruitStack.db.deleteStack();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -61,9 +118,17 @@ class _TreeScreenState extends State<TreeScreen> {
                 style: Theme.of(context).textTheme.headline3,
               ),
               actions: [
-                IconButton(
+                PopupMenuButton(
                   icon: Icon(Icons.more_vert),
-                  onPressed: null,
+                  onSelected: (selectedValue) {
+                    _areYouSure();
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                      child: Text('Clear Tree'),
+                      value: 'Clear',
+                    ),
+                  ],
                 )
               ],
             ),
