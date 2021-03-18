@@ -58,7 +58,7 @@ class FruitStack with ChangeNotifier {
         );
       },
     );
-    print('called open() database');
+    //print('called open() database');
 
     return _database;
   }

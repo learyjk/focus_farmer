@@ -1,4 +1,4 @@
-package com.keeganleary.focus_farmer;
+package com.keeganleary.productivitytree;
 
 import io.flutter.embedding.android.FlutterActivity;
 
